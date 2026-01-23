@@ -1,4 +1,4 @@
-import type { Since } from "@/lib/types";
+import type { Since, AnalysisPeriod } from "@/lib/types";
 
 export function isISODate(date: string): boolean {
   return /^\d{4}-\d{2}-\d{2}$/.test(date);
@@ -34,5 +34,33 @@ export function shiftISODate(date: string, since: Since, delta: number): string 
   if (since === "weekly") shifted.setUTCDate(shifted.getUTCDate() + delta * 7);
   if (since === "monthly") shifted.setUTCMonth(shifted.getUTCMonth() + delta);
   return formatISODateUTC(shifted);
+}
+
+/**
+ * 获取从今天往前推 N 天的日期
+ * @param days 天数
+ * @returns YYYY-MM-DD 格式的日期字符串
+ */
+export function getDaysAgo(days: number): string {
+  const now = new Date();
+  const target = new Date(now);
+  target.setUTCDate(target.getUTCDate() - days);
+  return formatISODateUTC(target);
+}
+
+/**
+ * 将分析周期转换为天数
+ * @param period 分析周期
+ * @returns 天数
+ */
+export function periodToDays(period: AnalysisPeriod): number {
+  switch (period) {
+    case "7d":
+      return 7;
+    case "14d":
+      return 14;
+    case "30d":
+      return 30;
+  }
 }
 

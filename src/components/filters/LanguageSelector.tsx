@@ -3,25 +3,18 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import type { LanguageOption, Since } from "@/lib/types";
+import type { LanguageOption, Since, AnalysisPeriod } from "@/lib/types";
 import { cn } from "@/lib/cn";
 import { ChevronDownIcon, SearchIcon } from "@/components/ui/icons";
 import { buildHref } from "@/lib/url";
 
+type LanguageSelectorProps =
+  | { mode: "latest"; since: Since; language: string; languages: LanguageOption[] }
+  | { mode: "archive"; since: Since; language: string; date: string; languages: LanguageOption[] }
+  | { mode: "insights"; period: AnalysisPeriod; language: string; languages: LanguageOption[] };
 
-export function LanguageSelector({
-  mode,
-  since,
-  language,
-  date,
-  languages
-}: {
-  mode: "latest" | "archive";
-  since: Since;
-  language: string;
-  date?: string;
-  languages: LanguageOption[];
-}) {
+export function LanguageSelector(props: LanguageSelectorProps) {
+  const { mode, language, languages } = props;
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [mounted, setMounted] = useState(false);
@@ -124,10 +117,20 @@ export function LanguageSelector({
         {filtered.length === 0 ? <div className="p-3 text-sm text-muted">No matches.</div> : null}
         {filtered.map((l) => {
           const active = l.slug === language;
+
+          let href: string;
+          if (mode === "archive") {
+            href = buildHref({ mode, since: props.since, language: l.slug, date: props.date });
+          } else if (mode === "insights") {
+            href = buildHref({ mode, period: props.period, language: l.slug });
+          } else {
+            href = buildHref({ mode, since: props.since, language: l.slug });
+          }
+
           return (
             <Link
               key={l.slug}
-              href={buildHref({ mode, since, language: l.slug, date })}
+              href={href}
               onClick={() => setOpen(false)}
               className={cn(
                 "flex items-center justify-between rounded-md px-3 py-2 text-sm",

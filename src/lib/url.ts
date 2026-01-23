@@ -1,4 +1,4 @@
-import type { Since } from "@/lib/types";
+import type { Since, AnalysisPeriod } from "@/lib/types";
 
 export function encodePathSegment(raw: string): string {
   return encodeURIComponent(raw);
@@ -12,8 +12,17 @@ export function pathArchive(date: string, since: Since, language: string): strin
   return `/archive/${encodePathSegment(date)}/${since}/${encodePathSegment(language)}`;
 }
 
-export function buildHref(opts: { mode: "latest" | "archive"; since: Since; language: string; date?: string }): string {
-  if (opts.mode === "archive") return pathArchive(opts.date ?? "", opts.since, opts.language);
+export function buildHref(opts:
+  | { mode: "latest"; since: Since; language: string }
+  | { mode: "archive"; since: Since; language: string; date: string }
+  | { mode: "insights"; period: AnalysisPeriod; language: string }
+): string {
+  if (opts.mode === "archive") return pathArchive(opts.date, opts.since, opts.language);
+  if (opts.mode === "insights") return pathInsights(opts.period, opts.language);
   return pathLatest(opts.since, opts.language);
+}
+
+export function pathInsights(period: AnalysisPeriod, language: string): string {
+  return `/insights/${period}/${encodePathSegment(language)}`;
 }
 
